@@ -12,14 +12,7 @@ import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 import supybot.utils.minisix as minisix
 
-import sys
 import json
-import socket
-import unicodedata
-
-from urllib.parse import urlencode
-from urllib.request import urlopen, Request
-from urllib.error import HTTPError, URLError
 
 try:
     from supybot.i18n import PluginInternationalization
@@ -44,11 +37,11 @@ class Searx(callbacks.Plugin):
         ref = 'http://%s/%s' % (dynamic.irc.server, dynamic.irc.nick)
         headers = dict(utils.web.defaultHeaders)
         headers['Referer'] = ref
-        opts = {'q': query}
+        opts = {'q': query, 'format': 'json'}
       
         #defLang = self.registryValue('defaultLanguage', channel)
 
-        text = utils.web.getUrlFd('%s&%s' % ('https://searx.me/?format=json',
+        text = utils.web.getUrlFd('%s?%s' % ('https://searx.me/', 
                                            utils.web.urlencode(opts)),
                                 headers=headers)
         return text

@@ -42,8 +42,7 @@ class Searx(callbacks.Plugin):
         self.__parent.__init__(irc)
 
     def search(self, query, channel):
-        """search("search phrase", options={})
-        """
+        """search("search phrase")"""
 
         ref = 'http://%s/%s' % (dynamic.irc.server, dynamic.irc.nick)
         headers = dict(utils.web.defaultHeaders)
@@ -86,8 +85,8 @@ class Searx(callbacks.Plugin):
             return [minisix.u('; ').join(results)]
 
     def searx(self, irc, msg, args, text):
-        """<search> [--{filter,language} <value>]
-        """
+        """<search> <value>]"""
+
         data = self.search(text, msg.args[0])
         bold = self.registryValue('bold', msg.args[0])
         max = self.registryValue('maximumResults', msg.args[0])

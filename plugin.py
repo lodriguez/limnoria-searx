@@ -33,9 +33,6 @@ except ImportError:
 class Searx(callbacks.Plugin):
     """does a search on https://searx.me/"""
     threaded = True
-    page = ''
-    result =''
-    info = []
     
     def __init__(self, irc):
         self.__parent = super(Searx, self)

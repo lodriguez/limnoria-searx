@@ -45,10 +45,15 @@ class Searx(callbacks.Plugin):
                                            utils.web.urlencode(opts)),
                                 headers=headers)
         return text
-
-    def formatData(self, data, bold=True, max=0, onetoone=False):
+    def getData(self, data):
+        """creates Python Object with results from Json string"""
         data = json.loads(data.read().decode('utf-8'))
         data = data['results']
+        return data
+
+    def formatData(self, data, bold=True, max=0, onetoone=False):
+        """formats Data for output"""
+        data = self.getData(data)
         results = []
         if max:
             data = data[:max]

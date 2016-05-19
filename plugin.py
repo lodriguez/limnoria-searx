@@ -25,22 +25,26 @@ except ImportError:
 
 class Searx(callbacks.Plugin):
     """does a search on https://searx.me/"""
+
     threaded = True
+    filterlist = ['files', 'images', 'it', 'map', 'music', 'news', 'science', 'social', 'videos']
     
     def __init__(self, irc):
         self.__parent = super(Searx, self)
         self.__parent.__init__(irc)
 
-    def search(self, query, channel):
+    def search(self, query, channel, filters={}):
         """search("search phrase")"""
 
         ref = 'http://%s/%s' % (dynamic.irc.server, dynamic.irc.nick)
         headers = dict(utils.web.defaultHeaders)
         headers['Referer'] = ref
+
         opts = {'q': query, 'format': 'json'}
+        for key, value in filters.items():
+            opts[key] = value
       
         #defLang = self.registryValue('defaultLanguage', channel)
-
         text = utils.web.getUrlFd('%s?%s' % ('https://searx.me/', 
                                            utils.web.urlencode(opts)),
                                 headers=headers)
@@ -79,20 +83,29 @@ class Searx(callbacks.Plugin):
         else:
             return [minisix.u('; ').join(results)]
 
-    def searx(self, irc, msg, args, text):
-        """<search> <value>]"""
+    def searx(self, irc, msg, args, opts, text):
+        """<search> [--filter (files, images, it, map, music, news, science, social, videos)] <value>"""
 
-        data = self.search(text, msg.args[0])
+        if opts:
+            opts = dict(opts)
+            opts = opts['filter']
+            if opts not in self.filterlist:
+                irc.error(opts+' is not a valid filter option.')
+            else:
+                if opts == 'social':
+                    filter = {'category_'+opts+' media':'on'}
+                else:
+                    filter = {'category_'+opts:'on'}
+
+        data = self.search(text, msg.args[0], dict(filter))
         bold = self.registryValue('bold', msg.args[0])
         max = self.registryValue('maximumResults', msg.args[0])
-        # We don't use supybot.reply.oneToOne here, because you generally
-        # do not want @google to echo ~20 lines of results, even if you
-        # have reply.oneToOne enabled.
         onetoone = self.registryValue('oneToOne', msg.args[0])
         for result in self.formatData(data,
                                   bold=bold, max=max, onetoone=onetoone):
             irc.reply(result)
-    searx = wrap(searx, ['text'])
+
+    searx = wrap(searx, [getopts({'filter':'something'}),'text'])
 
 Class = Searx
 

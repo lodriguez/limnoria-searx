@@ -15,4 +15,4 @@ usage
 
 - lucky
  Returns the frist result (like Google's "I'm Feeling Lucky")
- 
+ >!lucky string 

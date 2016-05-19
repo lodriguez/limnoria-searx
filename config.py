@@ -32,6 +32,9 @@ class NumSearchResults(registry.PositiveInteger):
         super(self.__class__, self).setValue(v)
 
 Searx = conf.registerPlugin('Searx')
+conf.registerChannelValue(Searx, 'url',
+    registry.String('https://searx.me/', _("""Determines the URL used for
+    requests.""")))
 conf.registerChannelValue(Searx, 'bold',
     registry.Boolean(True, _("""Determines whether results are bolded.""")))
 conf.registerChannelValue(Searx, 'oneToOne',

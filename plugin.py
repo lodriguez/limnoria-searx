@@ -45,7 +45,8 @@ class Searx(callbacks.Plugin):
             opts[key] = value
 
         url = self.registryValue('url', channel)
-
+        print ('%s?%s' % (url,
+                                           utils.web.urlencode(opts)))
         text = utils.web.getUrlFd('%s?%s' % (url, 
                                            utils.web.urlencode(opts)),
                                 headers=headers)
@@ -84,6 +85,30 @@ class Searx(callbacks.Plugin):
             return results
         else:
             return [minisix.u('; ').join(results)]
+
+    def lucky(self, irc, msg, args, opts, text):
+        """[--snippet] <search>
+        Does a Searx search, but only returns the first result.
+        If option --snippet is given, returns also the page text snippet.
+        """
+
+        opts = dict(opts)
+        data = self.search(text, msg.args[0])
+        data = self.getData(data)
+
+        if data:
+            url = data[0]['url']
+            if 'snippet' in opts:
+                snippet = data[0]['content']
+                snippet = " | " + utils.web.htmlToText(snippet, tagReplace='')
+            else:
+                snippet = ""
+            result = url + snippet
+            irc.reply(result)
+        else:
+            irc.reply(_('searx found nothing.'))
+
+    lucky = wrap(lucky, [getopts({'snippet':'',}), 'text'])
 
     def searx(self, irc, msg, args, opts, text):
         """[--filter <value>] <search>

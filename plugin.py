@@ -43,12 +43,14 @@ class Searx(callbacks.Plugin):
         opts = {'q': query, 'format': 'json'}
         for key, value in filters.items():
             opts[key] = value
-      
-        #defLang = self.registryValue('defaultLanguage', channel)
-        text = utils.web.getUrlFd('%s?%s' % ('https://searx.me/', 
+
+        url = self.registryValue('url', channel)
+
+        text = utils.web.getUrlFd('%s?%s' % (url, 
                                            utils.web.urlencode(opts)),
                                 headers=headers)
         return text
+
     def getData(self, data):
         """creates Python Object with results from Json string"""
         data = json.loads(data.read().decode('utf-8'))
@@ -84,18 +86,22 @@ class Searx(callbacks.Plugin):
             return [minisix.u('; ').join(results)]
 
     def searx(self, irc, msg, args, opts, text):
-        """<search> [--filter (files, images, it, map, music, news, science, social, videos)] <value>"""
+        """[--filter <value>] <search>
 
+	Searches Searx for the given string; --filter accepts (files, images, it, map, music, news, science, social, videos)
+        """
+
+        filter = {}
         if opts:
             opts = dict(opts)
             opts = opts['filter']
             if opts not in self.filterlist:
-                irc.error(opts+' is not a valid filter option.')
+                irc.error('%s is not a valid filter option.' % opts)
             else:
                 if opts == 'social':
-                    filter = {'category_'+opts+' media':'on'}
+                    filter = {'category_%s media' % opts:'on'}
                 else:
-                    filter = {'category_'+opts:'on'}
+                    filter = {'category_%s' % opts:'on'}
 
         data = self.search(text, msg.args[0], dict(filter))
         bold = self.registryValue('bold', msg.args[0])

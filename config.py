@@ -43,5 +43,8 @@ conf.registerChannelValue(Searx, 'oneToOne',
 conf.registerChannelValue(Searx, 'maximumResults',
     NumSearchResults(3, _("""Determines the maximum number of results returned
     from the google command.""")))
+conf.registerChannelValue(Searx, 'defaultLanguage',
+    registry.String('all', _("""Determines what default language is used in
+    searches.  If left empty, no specific language will be requested.""")))
 
 # vim:set shiftwidth=4 tabstop=4 expandtab textwidth=79:

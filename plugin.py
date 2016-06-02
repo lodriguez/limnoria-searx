@@ -35,18 +35,22 @@ class Searx(callbacks.Plugin):
 
     def search(self, query, channel, filters={}):
         """search("search phrase")"""
-
-        ref = 'http://%s/%s' % (dynamic.irc.server, dynamic.irc.nick)
-        headers = dict(utils.web.defaultHeaders)
-        headers['Referer'] = ref
-
+        
         opts = {'q': query, 'format': 'json'}
         for key, value in filters.items():
             opts[key] = value
 
+        defaultLanguage = self.registryValue('defaultLanguage', channel)
+        #if opts['language']:
+        #    defaultLanguage = opts['language']
+
+        ref = 'http://%s/%s' % (dynamic.irc.server, dynamic.irc.nick)
+        headers = dict(utils.web.defaultHeaders)
+        headers['Referer'] = ref
+        headers['cookie'] = "%s=%s" % ('language', defaultLanguage)
+
         url = self.registryValue('url', channel)
-        print ('%s?%s' % (url,
-                                           utils.web.urlencode(opts)))
+
         text = utils.web.getUrlFd('%s?%s' % (url, 
                                            utils.web.urlencode(opts)),
                                 headers=headers)
@@ -128,15 +132,18 @@ class Searx(callbacks.Plugin):
                 else:
                     filter = {'category_%s' % opts:'on'}
 
-        data = self.search(text, msg.args[0], dict(filter))
-        bold = self.registryValue('bold', msg.args[0])
-        max = self.registryValue('maximumResults', msg.args[0])
-        onetoone = self.registryValue('oneToOne', msg.args[0])
-        for result in self.formatData(data,
+        try:
+            data = self.search(text, msg.args[0], dict(filter))
+            bold = self.registryValue('bold', msg.args[0])
+            max = self.registryValue('maximumResults', msg.args[0])
+            onetoone = self.registryValue('oneToOne', msg.args[0])
+            for result in self.formatData(data,
                                   bold=bold, max=max, onetoone=onetoone):
-            irc.reply(result)
+                irc.reply(result)
+        except:
+            irc.reply(_('searx found nothing.'))
 
-    searx = wrap(searx, [getopts({'filter':'something'}),'text'])
+    searx = wrap(searx, [getopts({'language':'something','filter':'something'}),'text'])
 
 Class = Searx
 
